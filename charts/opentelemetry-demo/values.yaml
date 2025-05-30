@@ -18,12 +18,13 @@ default:
   #  - name: OTEL_K8S_NODE_NAME
   #    value: "someConstantValue"
   image:
-    repository: ghcr.io/open-telemetry/demo
+    repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
     # Overrides the image tag whose default is the chart appVersion.
     # The service's name will be applied to the end of this value.
-    tag: ""
+    tag: "v2.1.0-latest"
     pullPolicy: IfNotPresent
-    pullSecrets: []
+    pullSecrets: 
+      - name: acr-secret
   # Default # of replicas for all components
   replicas: 1
   # default revisionHistoryLimit for all components (number of old ReplicaSets to retain)
@@ -575,8 +576,8 @@ components:
   flagd:
     enabled: true
     imageOverride:
-      repository: "ghcr.io/open-feature/flagd"
-      tag: "v0.11.1"
+      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+      tag: v0.12.3-flagd
     useDefault:
       env: true
     replicas: 1
@@ -667,8 +668,8 @@ components:
     useDefault:
       env: true
     imageOverride:
-      repository: "valkey/valkey"
-      tag: "7.2-alpine"
+      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+      tag: v8.1-alpine-valkey-cart
     replicas: 1
     ports:
       - name: valkey-cart
@@ -684,7 +685,10 @@ components:
 opentelemetry-collector:
   enabled: true
   image:
-    repository: "otel/opentelemetry-collector-contrib"
+    repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+    tag: v0.117.1-otel-collector
+  imagePullSecrets:
+    - name: acr-secret
   fullnameOverride: otel-collector
   mode: deployment
   presets:
@@ -789,6 +793,11 @@ jaeger:
     cassandra: false
   allInOne:
     enabled: true
+    image:
+      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+      tag: v1.64.0-jaeger
+    imagePullSecrets:
+      - name: acr-secret
     args:
       - "--memory.max-traces=5000"
       - "--query.base-path=/jaeger/ui"
@@ -829,6 +838,11 @@ prometheus:
     enabled: false
   server:
     fullnameOverride: prometheus
+    image:
+      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+      tag: v3.3.1-prometheus
+    imagePullSecrets:
+      - name: acr-secret
     extraFlags:
       - "enable-feature=exemplar-storage"
       - "web.enable-otlp-receiver"
@@ -871,6 +885,11 @@ prometheus:
 grafana:
   enabled: true
   fullnameOverride: grafana
+  image:
+    repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+    tag: v11.4.1-grafana
+  imagePullSecrets:
+    - name: acr-secret
   testFramework:
     enabled: false
   grafana.ini:
@@ -948,6 +967,11 @@ grafana:
 opensearch:
   enabled: true
   fullnameOverride: opensearch
+  image:
+    repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+    tag: v3.0.0-opensearch
+  imagePullSecrets:
+    - name: acr-secret
   clusterName: demo-cluster
   nodeGroup: otel-demo
   singleNode: true
