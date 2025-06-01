@@ -23,10 +23,10 @@ default:
     # The service's name will be applied to the end of this value.
     tag: "v2.1.0-latest"
     pullPolicy: IfNotPresent
-    pullSecrets: 
+    pullSecrets:
       - name: acr-secret
   # Default # of replicas for all components
-  replicas: 1
+  replicas: 3
   # default revisionHistoryLimit for all components (number of old ReplicaSets to retain)
   revisionHistoryLimit: 10
   # Default schedulingRules for all components
@@ -34,6 +34,14 @@ default:
     nodeSelector: {}
     affinity: {}
     tolerations: []
+    # Pod topology spread constraints for high availability across zones
+    topologySpreadConstraints: []
+    #  - maxSkew: 1
+    #    topologyKey: topology.kubernetes.io/zone
+    #    whenUnsatisfiable: DoNotSchedule
+    #    labelSelector:
+    #      matchLabels:
+    #        app.kubernetes.io/instance: "{{ .Release.Name }}"
   # Default securityContext for all components
   securityContext: {}
 
@@ -228,6 +236,17 @@ components:
       env: true
     service:
       port: 8080
+    # High availability configuration
+    replicas: 4
+    schedulingRules:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: opentelemetry-demo
+              app.kubernetes.io/component: checkout
     env:
       - name: CHECKOUT_PORT
         value: "8080"
@@ -365,6 +384,17 @@ components:
       env: true
     service:
       port: 8080
+    # High availability configuration  
+    replicas: 4
+    schedulingRules:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: opentelemetry-demo
+              app.kubernetes.io/component: frontend-proxy
     env:
       - name: ENVOY_PORT
         value: "8080"
@@ -468,6 +498,17 @@ components:
       env: true
     service:
       port: 8080
+    # High availability configuration
+    replicas: 4
+    schedulingRules:
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: opentelemetry-demo
+              app.kubernetes.io/component: payment
     env:
       - name: PAYMENT_PORT
         value: "8080"
@@ -576,7 +617,7 @@ components:
   flagd:
     enabled: true
     imageOverride:
-      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+      repository: "{{ .Values.default.image.repository }}"
       tag: v0.12.3-flagd
     useDefault:
       env: true
@@ -668,7 +709,7 @@ components:
     useDefault:
       env: true
     imageOverride:
-      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+      repository: "{{ .Values.default.image.repository }}"
       tag: v8.1-alpine-valkey-cart
     replicas: 1
     ports:
@@ -685,8 +726,8 @@ components:
 opentelemetry-collector:
   enabled: true
   image:
-    repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
-    tag: v0.117.1-otel-collector
+    repository: "{{ .Values.default.image.repository }}"
+    tag: v0.125.0-otel-collector
   imagePullSecrets:
     - name: acr-secret
   fullnameOverride: otel-collector
@@ -794,8 +835,8 @@ jaeger:
   allInOne:
     enabled: true
     image:
-      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
-      tag: v1.64.0-jaeger
+      repository: "{{ .Values.default.image.repository }}"
+      tag: v1.68.0-jaeger
     imagePullSecrets:
       - name: acr-secret
     args:
@@ -839,7 +880,7 @@ prometheus:
   server:
     fullnameOverride: prometheus
     image:
-      repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+      repository: "{{ .Values.default.image.repository }}"
       tag: v3.3.1-prometheus
     imagePullSecrets:
       - name: acr-secret
@@ -886,8 +927,8 @@ grafana:
   enabled: true
   fullnameOverride: grafana
   image:
-    repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
-    tag: v11.4.1-grafana
+    repository: "{{ .Values.default.image.repository }}"
+    tag: v11.6.1-grafana
   imagePullSecrets:
     - name: acr-secret
   testFramework:
@@ -968,7 +1009,7 @@ opensearch:
   enabled: true
   fullnameOverride: opensearch
   image:
-    repository: o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
+    repository: "{{ .Values.default.image.repository }}"
     tag: v3.0.0-opensearch
   imagePullSecrets:
     - name: acr-secret

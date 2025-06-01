@@ -1,9 +1,9 @@
 # ===================================================================
-# OpenTelemetry Demo ACR 部署 Makefile
+# OpenTelemetry Demo 部署 Makefile
 # ===================================================================
 
 # 配置变量
-ACR_REGISTRY ?= o11y-demo-registry-vpc.cn-hongkong.cr.aliyuncs.com
+ACR_REGISTRY ?= o11y-demo-registry.cn-hongkong.cr.aliyuncs.com
 ACR_NAMESPACE ?= o11y-demo
 CHART_VERSION ?= 0.37.2
 K8S_NAMESPACE ?= opentelemetry-demo
@@ -14,8 +14,8 @@ VALUES_FILE = $(CHART_PATH)/values.yaml
 OUTPUT_DIR = ./helm-packages
 
 # ACR 凭据 (可选的环境变量)
-ACR_USERNAME ?= username
-ACR_PASSWORD ?= password
+ACR_USERNAME ?= 
+ACR_PASSWORD ?= 
 
 # 颜色定义
 RED = \033[0;31m
@@ -108,6 +108,15 @@ test-local: ## 2️⃣ 本地测试：验证 chart 配置
 		exit 1; \
 	fi
 	@echo "$(GREEN)✅ Helm 版本: $$(helm version --short)$(NC)"
+	@echo "$(GREEN)添加必要的 Helm 仓库...$(NC)"
+	@helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || true
+	@helm repo add jaegertracing https://jaegertracing.github.io/helm-charts || true
+	@helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+	@helm repo add grafana https://grafana.github.io/helm-charts || true
+	@helm repo add opensearch https://opensearch-project.github.io/helm-charts || true
+	@echo "$(GREEN)更新 Helm 仓库...$(NC)"
+	@helm repo update
+	@echo "$(GREEN)✅ Helm 仓库配置完成$(NC)"
 	@echo "$(GREEN)构建 Chart 依赖...$(NC)"
 	@cd $(CHART_PATH) && helm dependency build
 	@echo "$(GREEN)✅ 依赖构建成功$(NC)"
@@ -127,6 +136,22 @@ test-local: ## 2️⃣ 本地测试：验证 chart 配置
 package: ## 3️⃣ 打包阶段：生成 helm chart 包
 	@echo "$(MAGENTA)🎯 Step 3: 打包阶段$(NC)"
 	@mkdir -p $(OUTPUT_DIR)
+	@echo "$(GREEN)检查并构建 Chart 依赖...$(NC)"
+	@cd $(CHART_PATH); \
+	if [ -f "Chart.yaml" ] && grep -q "dependencies:" "Chart.yaml"; then \
+		echo "$(YELLOW)发现 Chart 依赖，正在配置仓库...$(NC)"; \
+		helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || true; \
+		helm repo add jaegertracing https://jaegertracing.github.io/helm-charts || true; \
+		helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true; \
+		helm repo add grafana https://grafana.github.io/helm-charts || true; \
+		helm repo add opensearch https://opensearch-project.github.io/helm-charts || true; \
+		helm repo update; \
+		echo "$(YELLOW)正在构建依赖...$(NC)"; \
+		helm dependency build; \
+		echo "$(GREEN)✅ 依赖构建成功$(NC)"; \
+	else \
+		echo "$(CYAN)ℹ️  无需构建依赖$(NC)"; \
+	fi
 	@echo "$(GREEN)打包 Helm Chart...$(NC)"
 	@helm package $(CHART_PATH) --version $(CHART_VERSION) --destination $(OUTPUT_DIR)
 	@PACKAGE_FILE="$(OUTPUT_DIR)/$(CHART_NAME)-$(CHART_VERSION).tgz"; \

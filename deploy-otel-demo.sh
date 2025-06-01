@@ -188,6 +188,17 @@ test_local() {
     fi
     
     echo -e "${GREEN}✅ Helm 版本: $(helm version --short)${NC}"
+    
+    echo -e "${GREEN}添加必要的 Helm 仓库...${NC}"
+    helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || true
+    helm repo add jaegertracing https://jaegertracing.github.io/helm-charts || true
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+    helm repo add grafana https://grafana.github.io/helm-charts || true
+    helm repo add opensearch https://opensearch-project.github.io/helm-charts || true
+    echo -e "${GREEN}更新 Helm 仓库...${NC}"
+    helm repo update
+    echo -e "${GREEN}✅ Helm 仓库配置完成${NC}"
+    
     echo -e "${GREEN}构建 Chart 依赖...${NC}"
     cd $CHART_PATH && helm dependency build && cd ../..
     echo -e "${GREEN}✅ 依赖构建成功${NC}"
@@ -209,6 +220,30 @@ test_local() {
 package() {
     echo -e "${MAGENTA}🎯 Step 3: 打包阶段${NC}"
     mkdir -p $OUTPUT_DIR
+    
+    echo -e "${GREEN}检查并构建 Chart 依赖...${NC}"
+    cd $CHART_PATH
+    
+    # 检查是否存在依赖
+    if [ -f "Chart.yaml" ] && grep -q "dependencies:" "Chart.yaml"; then
+        echo -e "${YELLOW}发现 Chart 依赖，正在配置仓库...${NC}"
+        # 添加必要的 Helm 仓库
+        helm repo add open-telemetry https://open-telemetry.github.io/opentelemetry-helm-charts || true
+        helm repo add jaegertracing https://jaegertracing.github.io/helm-charts || true
+        helm repo add prometheus-community https://prometheus-community.github.io/helm-charts || true
+        helm repo add grafana https://grafana.github.io/helm-charts || true
+        helm repo add opensearch https://opensearch-project.github.io/helm-charts || true
+        helm repo update
+        
+        echo -e "${YELLOW}正在构建依赖...${NC}"
+        helm dependency build
+        echo -e "${GREEN}✅ 依赖构建成功${NC}"
+    else
+        echo -e "${CYAN}ℹ️  无需构建依赖${NC}"
+    fi
+    
+    cd ../..
+    
     echo -e "${GREEN}打包 Helm Chart...${NC}"
     helm package $CHART_PATH --version $CHART_VERSION --destination $OUTPUT_DIR
     
