@@ -835,7 +835,7 @@ jaeger:
   allInOne:
     enabled: true
     image:
-      repository: "{{ .Values.default.image.repository }}"
+      repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
       tag: v1.68.0-jaeger
     imagePullSecrets:
       - name: acr-secret
@@ -880,7 +880,7 @@ prometheus:
   server:
     fullnameOverride: prometheus
     image:
-      repository: "{{ .Values.default.image.repository }}"
+      repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
       tag: v3.3.1-prometheus
     imagePullSecrets:
       - name: acr-secret
@@ -927,7 +927,7 @@ grafana:
   enabled: true
   fullnameOverride: grafana
   image:
-    repository: "{{ .Values.default.image.repository }}"
+    repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
     tag: v11.6.1-grafana
   imagePullSecrets:
     - name: acr-secret
@@ -1008,7 +1008,7 @@ opensearch:
   enabled: true
   fullnameOverride: opensearch
   image:
-    repository: "{{ .Values.default.image.repository }}"
+    repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
     tag: v3.0.0-opensearch
   imagePullSecrets:
     - name: acr-secret
