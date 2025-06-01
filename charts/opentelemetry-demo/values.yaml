@@ -617,7 +617,7 @@ components:
   flagd:
     enabled: true
     imageOverride:
-      repository: "{{ .Values.default.image.repository }}"
+      repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
       tag: v0.12.3-flagd
     useDefault:
       env: true
@@ -709,7 +709,7 @@ components:
     useDefault:
       env: true
     imageOverride:
-      repository: "{{ .Values.default.image.repository }}"
+      repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
       tag: v8.1-alpine-valkey-cart
     replicas: 1
     ports:
@@ -726,7 +726,7 @@ components:
 opentelemetry-collector:
   enabled: true
   image:
-    repository: "{{ .Values.default.image.repository }}"
+    repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
     tag: v0.125.0-otel-collector
   imagePullSecrets:
     - name: acr-secret
