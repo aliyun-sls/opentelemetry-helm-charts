@@ -725,11 +725,11 @@ components:
 
 opentelemetry-collector:
   enabled: true
+  imagePullSecrets:
+    - name: acr-secret
   image:
     repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
     tag: v0.125.0-otel-collector
-    pullSecrets:
-      - name: acr-secret
   fullnameOverride: otel-collector
   mode: deployment
   presets:
@@ -829,6 +829,8 @@ opentelemetry-collector:
 
 jaeger:
   enabled: true
+  imagePullSecrets:
+    - name: acr-secret
   fullnameOverride: jaeger
   provisionDataStore:
     cassandra: false
@@ -837,8 +839,6 @@ jaeger:
     image:
       repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
       tag: v1.68.0-jaeger
-      pullSecrets:
-        - name: acr-secret
     args:
       - "--memory.max-traces=5000"
       - "--query.base-path=/jaeger/ui"
@@ -866,6 +866,8 @@ jaeger:
 
 prometheus:
   enabled: true
+  imagePullSecrets:
+    - name: acr-secret
   alertmanager:
     enabled: false
   configmapReload:
@@ -879,8 +881,6 @@ prometheus:
     enabled: false
   server:
     fullnameOverride: prometheus
-    imagePullSecrets:
-      - name: acr-secret
     image:
       repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
       tag: v3.3.1-prometheus
@@ -925,12 +925,12 @@ prometheus:
 
 grafana:
   enabled: true
+  imagePullSecrets:
+    - name: acr-secret
   fullnameOverride: grafana
   image:
     repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
     tag: v11.6.1-grafana
-    pullSecrets:
-      - name: acr-secret
   testFramework:
     enabled: false
   grafana.ini:
@@ -1006,12 +1006,12 @@ grafana:
 
 opensearch:
   enabled: true
+  imagePullSecrets:
+    - name: acr-secret
   fullnameOverride: opensearch
   image:
     repository: o11y-demo-registry.cn-hongkong.cr.aliyuncs.com/o11y-demo/demo
     tag: v3.0.0-opensearch
-    pullSecrets:
-      - name: acr-secret
   clusterName: demo-cluster
   nodeGroup: otel-demo
   singleNode: true
